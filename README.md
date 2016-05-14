@@ -12,9 +12,11 @@ The simplest way to manage git repos within git repos.
 <a name="the_long_explanation"/>  
 ## the long explanation
 
-It is [quite a common desire](https://www.google.es/search?q=git+repos+within+git+repos) to somehow have git repositories within git repositories<sup name="fe1">[[1]](#fn1)</sup>.  The usual answers involve convoluted incantations of [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) (with [the usual word of warning about their use](https://codingkilledthecat.wordpress.com/2012/04/28/why-your-company-shouldnt-use-git-submodules/)), [git-subtree](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) (which is [_oh, so much easier!_](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/?_ga=1.267682510.1986266707.1461346777)), or even especially crafted tools to deal with the complexity of those<sup name="fe1">[[2]](#fn2)</sup>.
+It is [quite a common desire](https://www.google.es/search?q=git+repos+within+git+repos) to somehow have git repositories within git repositories<sup name="fe1">[[1]](#fn1)</sup>.  The typical answers involve convoluted incantations of [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) (with [the usual word of caution about their use](https://codingkilledthecat.wordpress.com/2012/04/28/why-your-company-shouldnt-use-git-submodules/)), [git-subtree](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) (which is [_oh, so much easier!_](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/?_ga=1.267682510.1986266707.1461346777)), or even specifically crafted tools to deal with the complexity of those<sup name="fe1">[[2]](#fn2)</sup>.
 
-In the end, the point is that something that sounds like it should be easy ends up being quite complex and -the worse of it, error prone.  But, does it need to be so complex?
+In the end, the point is that something that sounds like it should be easy ends up being complex and -the worse of it, error prone.
+
+But, **_does it need to be so complex?_**
 
 The naive approach (_my_ naive approach at least) would be _...well, why not just dropping a git repo within another git repo?_  Much to my surprise after a long search on Google without results, that's not only perfectly possible, but trivially easy indeed, and basically without any bad side effect.
 
@@ -35,15 +37,15 @@ Let's have a project which I'll call **_SUPER_** which have some glue files in o
            |
            |[SUB2]|file2
 
-Now, if I merely _consume_ the contents of **_SUB1_** and **_SUB2_** (and, of course, **_SUBSUB_**), using _vendor branches_ or just bringing them at build time from an artifacts repository will be surely good enough but, what if I want/need to also contribute to all of them?  Typically that's the case for corporate developments, where all those repositories belong to the same owner (the company) and the _"proper"_ way to test and evolution the submodules is by calling them from the parent one (or another similar one for testing purposes).  So, to recall the situation:  
+Now, if I merely _consume_ the contents of **_SUB1_** and **_SUB2_** (and, of course, **_SUBSUB_**), using _vendor branches_ or just bringing them at build time from an artifacts repository will be surely good enough but, what if I want/need to also contribute to all of them?  Typically that's the case for corporate environments, where all those repositories belong to the same owner (the company) and the _"proper"_ way to test and evolution the submodules is by calling them from the parent one (or another similar one for testing purposes).  So, to recall the situation:  
 
-1. The functionallity of the submodules can only be ascertained (at least comfortably) by means of their integration with the SUPER one.
+1. The functionallity of the submodules can only be ascertained (at least comfortably) by means of their integration with the **_SUPER_** one.
 2. I have write access to at least some branches on the submodules.
 
 <a name="the_solution"/>  
 ## the solution
 
-As I already said above, why not try to just create a git repo within another?  Let's try:
+As I already said above, why not try to just create a git repo within another?  So let's do it:
 ```
 jmnavarrol@:~/super$ git init
 Initialized empty Git repository in ~/super/.git/
@@ -70,7 +72,7 @@ jmnavarrol@:~/super/sub1$ git commit -m "first commit into the sub1 repo"
 jmnavarrol@:~/super/sub1$
 ```
 
-So, how is the world seen from the sub1 repo?
+So, how is the world seen from the **_SUB1_** repo?
 ```
 jmnavarrol@:~/super/sub1$ git checkout -b development
 Switched to a new branch 'development'
@@ -86,7 +88,7 @@ Date:   Sat May 14 20:24:56 2016 +0200
 jmnavarrol@:~/super/sub1$
 ```
 
-And what about super?
+And what about **_SUPER_**?
 ```
 jmnavarrol@:~/super/sub1$ cd ..
 jmnavarrol@:~/super$ git log
@@ -106,7 +108,7 @@ nothing added to commit but untracked files present (use "git add" to track)
 jmnavarrol@:~/super$
 ```
 
-Hummmm this looks like a problem... sub1 knows nothing about the parent repo (as it should) and super sees sub1 as an untracked dir.  What we should do?  If we add the sub1 directory to the super repository, all kind of nasty things will happen as the history of data within sub1 will be different depending if we ask to super or sub1 (see, for instance, that super _"thinks"_ to be in the _master_ branch, while sub1 sees itself in a different one).  On the other hand, if I just leave that sub1 directory untracked, it not only will become cumbersome, but I risk adding it on super by mistake.
+Hummmm this looks like a problem... **_SUB1_** knows nothing about the parent repo (as it should) and **_SUPER_** sees **_SUB1_** as an untracked dir.  What we should do?  If we add the sub1 directory to the super repository, all kind of nasty things will happen as the history of data within **_SUB1_** will be different depending if we ask to **_SUPER_** or **_SUB1_** (see, for instance, that **_SUPER_** _"thinks"_ to be in the _master_ branch, while **_SUB1_** sees itself in a different one).  On the other hand, if I just leave that `sub1` directory untracked, it not only will become cumbersome, but I risk adding it on **_SUPER_** by mistake.
 
 Luckily, the `.gitignore` file comes to the rescue:
 ```
@@ -122,7 +124,7 @@ nothing to commit, working directory clean
 jmnavarrol@:~/super$
 ```
 
-See? sub1 has _"disappeared"_ from sight and it's guaranteed to stay that way (as long as the relevant entry within `.gitignore` stays in place).
+See? **_SUB1_** has _"disappeared"_ from sight and it's guaranteed to stay that way (as long as the relevant entry within `.gitignore` stays in place).
 
 From now on you can manage **_SUPER_** and **_SUB1_** just as two completely different repositories: no need to learn the arcanes of a new tool, no more _"Oh! I pushed to the wrong repo!"_, or _"I pulled from the parent repo... where the heck have my changes on the submodule gone!?"_, just plain old git commands.
 
@@ -131,9 +133,9 @@ From now on you can manage **_SUPER_** and **_SUB1_** just as two completely dif
 
 There's no much forward to go to: the trick about `.gitignore` is basically all of it.  After all I promised _"The simplest way"_, right?
 
-There is one problem, though, and it comes _because_ of the fact that **_SUPER_** and **_SUB1_** are so completely decoupled (which was my _selling advantage_ to start with): in the example above I worked on local repositories but what if, as it is the usual case, there is a whole team working out of remote repos?  When somebody clones **_SUPER_** he gets no hint on what to do to reach to **_SUB1_** or even that it exists at all.  Of course, one could resort to plain old documentation to tell him what to do but that wouldn't be _"making easy things easy"_ right?
+There is one problem, though, and it comes _because_ of the fact that **_SUPER_** and **_SUB1_** are so completely decoupled (which was my _selling point_ to start with): in the example above I worked on local repositories but what if, as it is the usual case, there is a whole team working out of remote repos?  When somebody clones **_SUPER_** he gets no hint on what to do to reach to **_SUB1_** or even that it exists at all.  Of course, one could resort to external documentation to tell him what to do but that wouldn't be _"making easy things easy"_ right?
 
-For that I created a very simple script, `build_subrepos.sh` that reads the subrepos to manage from a Bash Hash and recursively _git clones_ them.  By recursively I mean that it looks for other `build_subrepos.sh` scripts within the directory hierarchy to run them in turn so, starting from the top repo it clones all the defined subrepos in recursion.  Starting in any middle point, running it from **_SUB1_** in the scheme above, will do the expected: clone whatever repos there are defined down the line.
+For that I created a simple script, `build_subrepos.sh` that reads the subrepos to manage from a Bash Hash and recursively _git clones_ them.  By recursively I mean that it looks for other `build_subrepos.sh` scripts within the directory hierarchy to run them in turn so, starting from the top repo it clones all the defined subrepos in recursion.  Starting in any middle point, running it from **_SUB1_** in the scheme above, will do the expected: clone whatever repos there are defined down the line.  Once all the repos are in place, it's just a matter of using git as if they were completely in isolation.
 
 I created three projects at GitHub to publish the script and self-explain its working by means of the **_SUPER / SUB1 / SUB2 / SUBSUB_** example.
 
@@ -146,4 +148,5 @@ I created three projects at GitHub to publish the script and self-explain its wo
 * <sub>Google's [git-repo](https://code.google.com/p/git-repo/)</sub>
 * <sub>[Gitslave](http://gitslave.sourceforge.net/)</sub>
 * <sub>[Git External](http://danielcestari.com/git-external/)</sub>
+* <sub>[clowder](https://raw.githubusercontent.com/JrGoodle/clowder/master/README.md) (by the way, it lists some other tools too)</sub>
 * <sub>...you name it!</sub>
