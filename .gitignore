@@ -1,3 +1,7 @@
+# Subrepo ignores
+sub1/
+sub2/
+
 # global git ignores
 *~
 *.swp
