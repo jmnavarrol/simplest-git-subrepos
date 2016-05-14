@@ -12,7 +12,7 @@ The simplest way to manage git repos within git repos.
 <a name="the_long_explanation"/>  
 ## the long explanation
 
-It is [quite a common desire](https://www.google.es/search?q=git+repos+within+git+repos) to somehow have git repositories within git repositories<sup name="fe1">[[1]](#fn1)</sup>.  The typical answers involve convoluted incantations of [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) (with [the usual word of caution about their use](https://codingkilledthecat.wordpress.com/2012/04/28/why-your-company-shouldnt-use-git-submodules/)), [git-subtree](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) (which is [_oh, so much easier!_](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/?_ga=1.267682510.1986266707.1461346777)), or even specifically crafted tools to deal with the complexity of those<sup name="fe1">[[2]](#fn2)</sup>.
+It is [quite a common desire](https://www.google.es/search?q=git+repos+within+git+repos) to somehow have git repositories within git repositories<sup name="fe1">[[1]](#fn1)</sup>.  The typical answers involve convoluted incantations of [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) (with [the usual word of caution about them](https://codingkilledthecat.wordpress.com/2012/04/28/why-your-company-shouldnt-use-git-submodules/)), [git-subtree](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) (which is [_oh, so much easier!_](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/?_ga=1.267682510.1986266707.1461346777)), or even specifically crafted tools to deal with the complexity of those<sup name="fe1">[[2]](#fn2)</sup>.
 
 In the end, the point is that something that sounds like it should be easy ends up being complex and -the worse of it, error prone.
 
@@ -25,7 +25,7 @@ After such a _"discovery"_ I decided to share publicly by example in case others
 <a name="the_use_case"/>  
 ## the use case
 
-It seems that the motto _"make easy things easy and hard things possible"_ can be tracked down to [Larry Wall](https://www.wikipedia.org/wiki/Larry_Wall) and his ["Learning Perl"](http://shop.oreilly.com/product/9781565922846.do), aka _the Llama book_.  I'm not telling submodules, subtrees, all those tools... are not without merit but I do say they fail Wall's saying: they certainly fail at making easy things easy.  But, what I want to suit then?
+It seems that the motto _"make easy things easy and hard things possible"_ can be tracked down to [Larry Wall](https://www.wikipedia.org/wiki/Larry_Wall) and ["Learning Perl"](http://shop.oreilly.com/product/9781565922846.do), aka _the Llama book_.  I'm not telling submodules, subtrees, all those tools... are not without merit but I do say they fail Wall's saying: they certainly fail at making easy things easy.  But, what I want to suit then?
 
 Let's have a project which I'll call **_SUPER_** which have some glue files in order to tie together another two ones which I'll call **_SUB1_** and **_SUB2_** (you can think of, say, a web front end using two modules, or whatever).  Just to make things funnier, let's imagine that **_SUB1_** also includes a deeper module, which I'll call **_SUBSUB_**.  Overall, the layout looks like this:
 
@@ -37,7 +37,7 @@ Let's have a project which I'll call **_SUPER_** which have some glue files in o
            |
            |[SUB2]|file2
 
-Now, if I merely _consume_ the contents of **_SUB1_** and **_SUB2_** (and, of course, **_SUBSUB_**), using _vendor branches_ or just bringing them at build time from an artifacts repository will be surely good enough but, what if I want/need to also contribute to all of them?  Typically that's the case for corporate environments, where all those repositories belong to the same owner (the company) and the _"proper"_ way to test and evolution the submodules is by calling them from the parent one (or another similar one for testing purposes).  So, to recall the situation:  
+Now, if I merely _consume_ the contents of **_SUB1_** and **_SUB2_** (and, of course, **_SUBSUB_**), using _vendor branches_ or just bringing them at build time from an artifacts repository would be good enough but, what if I want/need to also contribute to all of them?  Typically that's the case for corporate environments, where all those repositories belong to the same owner (the company) and the _"proper"_ way to test and evolution the submodules is by calling them from the parent one (or another similar one for testing purposes).  So, to recall the situation:  
 
 1. The functionallity of the submodules can only be ascertained (at least comfortably) by means of their integration with the **_SUPER_** one.
 2. I have write access to at least some branches on the submodules.
@@ -108,7 +108,7 @@ nothing added to commit but untracked files present (use "git add" to track)
 jmnavarrol@:~/super$
 ```
 
-Hummmm this looks like a problem... **_SUB1_** knows nothing about the parent repo (as it should) and **_SUPER_** sees **_SUB1_** as an untracked dir.  What we should do?  If we add the sub1 directory to the super repository, all kind of nasty things will happen as the history of data within **_SUB1_** will be different depending if we ask to **_SUPER_** or **_SUB1_** (see, for instance, that **_SUPER_** _"thinks"_ to be in the _master_ branch, while **_SUB1_** sees itself in a different one).  On the other hand, if I just leave that `sub1` directory untracked, it not only will become cumbersome, but I risk adding it on **_SUPER_** by mistake.
+Hummm... this looks like a problem... **_SUB1_** knows nothing about the parent repo (as it should) and **_SUPER_** sees **_SUB1_** as an untracked dir.  What we should do?  If we add the `sub1` directory to the **_SUPER_** repository, all kinds of nasty things will happen as the history of data within **_SUB1_** will be different depending if we ask to **_SUPER_** or **_SUB1_** (see, for instance, that **_SUPER_** _"thinks"_ to be in the _master_ branch, while **_SUB1_** sees itself in a different one).  On the other hand, if I just leave that `sub1` directory untracked, it not only will become cumbersome, but I risk adding it on **_SUPER_** by mistake.
 
 Luckily, the `.gitignore` file comes to the rescue:
 ```
