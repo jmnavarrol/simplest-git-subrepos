@@ -140,6 +140,7 @@ For that I created a simple script, `build_subrepos.sh` that reads the subrepos 
 I created projects at GitHub to publish the script and self-explain its working by means of the **_SUPER / SUB1 / SUB2 / SUBSUB_** example:
 * The [**_SUB1_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-sub1)
   * The [**_SUBSUB_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-subsub)
+* The [**_SUB2_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-sub2)
 
 ----
 
