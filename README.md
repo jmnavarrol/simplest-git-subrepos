@@ -36,6 +36,7 @@ Let's have a project which I'll call **_SUPER_** which have some glue files in o
            |[SUB2]|file2
 
 Now, if I merely _consume_ the contents of **_SUB1_** and **_SUB2_** (and, of course, **_SUBSUB_**), using _vendor branches_ or just bringing them at build time from an artifacts repository will be surely good enough but, what if I want/need to also contribute to all of them?  Typically that's the case for corporate developments, where all those repositories belong to the same owner (the company) and the _"proper"_ way to test and evolution the submodules is by calling them from the parent one (or another similar one for testing purposes).  So, to recall the situation:  
+
 1. The functionallity of the submodules can only be ascertained (at least comfortably) by means of their integration with the SUPER one.
 2. I have write access to at least some branches on the submodules.
 
