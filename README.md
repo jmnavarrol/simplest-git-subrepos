@@ -29,7 +29,7 @@ It seems that the motto _"make easy things easy and hard things possible"_ can b
 
 Let's have a project which I'll call **_SUPER_** which have some glue files in order to tie together another two ones which I'll call **_SUB1_** and **_SUB2_** (you can think of, say, a web front end using two modules, or whatever).  Just to make things funnier, let's imagine that **_SUB1_** also includes a deeper module, which I'll call **_SUBSUB_**.  Overall, the layout looks like this:
 
-    [SUPER]|README.txt
+    [SUPER]|README.md
            |
            |[SUB1]|file1
            |      |
