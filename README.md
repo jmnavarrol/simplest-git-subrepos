@@ -137,7 +137,8 @@ There is one problem, though, and it comes _because_ of the fact that **_SUPER_*
 
 For that I created a simple script, `build_subrepos.sh` that reads the subrepos to manage from a Bash Hash and recursively _git clones_ them.  By recursively I mean that it looks for other `build_subrepos.sh` scripts within the directory hierarchy to run them in turn so, starting from the top repo it clones all the defined subrepos in recursion.  Starting in any middle point, running it from **_SUB1_** in the scheme above, will do the expected: clone whatever repos there are defined down the line.  Once all the repos are in place, it's just a matter of using git as if they were completely in isolation.
 
-I created three projects at GitHub to publish the script and self-explain its working by means of the **_SUPER / SUB1 / SUB2 / SUBSUB_** example.
+I created projects at GitHub to publish the script and self-explain its working by means of the **_SUPER / SUB1 / SUB2 / SUBSUB_** example:
+* The [**_SUBSUB_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-subsub)
 
 ----
 
