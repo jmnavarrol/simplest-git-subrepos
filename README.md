@@ -13,7 +13,7 @@ The simplest way to manage git repos within git repos.
 <a name="the_long_explanation"/>  
 ## the long explanation
 
-It is [quite a common desire](https://www.google.es/search?q=git+repos+within+git+repos) to somehow have git repositories within git repositories<sup name="fe1">[[1]](#fn1)</sup>.  The typical answers involve convoluted incantations of [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) (with [the usual word of caution about them](https://codingkilledthecat.wordpress.com/2012/04/28/why-your-company-shouldnt-use-git-submodules/)), [git-subtree](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) (which is [_oh, so much easier!_](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/?_ga=1.267682510.1986266707.1461346777)), or even specifically crafted tools to deal with the complexity of those<sup name="fe1">[[2]](#fn2)</sup>.
+It is [quite a common desire](https://www.google.es/search?q=git+repos+within+git+repos) to somehow have git repositories within git repositories<sup name="fe1">[[1]](#fn1)</sup>.  The typical answers involve convoluted incantations of [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) (with [the usual word of caution about them](https://codingkilledthecat.wordpress.com/2012/04/28/why-your-company-shouldnt-use-git-submodules/)), [git-subtree](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) (which is [_oh, so much easier!_](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/?_ga=1.267682510.1986266707.1461346777)), or even specifically crafted tools to deal with the complexity of those<sup name="fe2">[[2]](#fn2)</sup>.
 
 In the end, the point is that something that sounds like it should be easy ends up being complex and -the worse of it, error prone.
 
@@ -207,13 +207,13 @@ simplest-git-subrepos/
 ```
 ...just as expected.
 
-Feel free to experiment with the script.  Comments, issues, pull requests are welcomed [at the project's page on GitHub](https://github.com/jmnavarrol/simplest-git-subrepos).
+Feel free to experiment with the script.  Comments, issues, pull requests... are welcomed [at the project's page on GitHub](https://github.com/jmnavarrol/simplest-git-subrepos).
 
 ----
 
 <sub>**<a name="fn1">1</a>.[↩](#fe1)** See, for instance, this [Stack Overflow question](http://stackoverflow.com/questions/4500305/git-repository-within-git-repository).</sub>
 
-<sub>**<a name="fn1">2</a>.[↩](#fe2)** Quite a lot of them, in fact.  Just to name a few:</sub>
+<sub>**<a name="fn2">2</a>.[↩](#fe2)** Quite a lot of them, in fact.  Just to name a few:</sub>
 * <sub>[git-subrepo](https://github.com/ingydotnet/git-subrepo)</sub>
 * <sub>Google's [git-repo](https://code.google.com/p/git-repo/)</sub>
 * <sub>[Gitslave](http://gitslave.sourceforge.net/)</sub>
