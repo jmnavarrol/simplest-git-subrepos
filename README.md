@@ -8,6 +8,7 @@ The simplest way to manage git repos within git repos.
 * [the use case](#the_use_case)
 * [the solution](#the_solution)
 * [going forward](#going_forward)
+* [multigit usage](#multigit_usage)
 
 <a name="the_long_explanation"/>  
 ## the long explanation
@@ -135,12 +136,78 @@ There's no much forward to go to: the trick about `.gitignore` is basically all 
 
 There is one problem, though, and it comes _because_ of the fact that **_SUPER_** and **_SUB1_** are so completely decoupled (which was my _selling point_ to start with): in the example above I worked on local repositories but what if, as it is the usual case, there is a whole team working out of remote repos?  When somebody clones **_SUPER_** he gets no hint on what to do to reach to **_SUB1_** or even that it exists at all.  Of course, one could resort to external documentation to tell him what to do but that wouldn't be _"making easy things easy"_ right?
 
-For that I created a simple script, `build_subrepos.sh` that reads the subrepos to manage from a Bash Hash and recursively _git clones_ them.  By recursively I mean that it looks for other `build_subrepos.sh` scripts within the directory hierarchy to run them in turn so, starting from the top repo it clones all the defined subrepos in recursion.  Starting in any middle point, running it from **_SUB1_** in the scheme above, will do the expected: clone whatever repos there are defined down the line.  Once all the repos are in place, it's just a matter of using git as if they were completely in isolation.
+For that I created a simple script, `multigit` that reads the subrepos to manage from a Bash hash in the `subrepos` file and recursively _git clones_ them.  By recursively I mean that it looks for other `multigit` scripts within the directory hierarchy to run them in turn so, starting from the top repo it clones all the defined subrepos in recursion.  Starting in any middle point, running it from **_SUB1_** in the scheme above, for instance, will do the expected: clone whatever repos there are defined down the line.  Once all the repos are in place, it's just a matter of using git as if they were completely in isolation.
 
 I created projects at GitHub to publish the script and self-explain its working by means of the **_SUPER / SUB1 / SUB2 / SUBSUB_** example:
-* The [**_SUB1_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-sub1)
-  * The [**_SUBSUB_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-subsub)
-* The [**_SUB2_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-sub2)
+* The [**_SUPER_** repository](https://github.com/jmnavarrol/simplest-git-subrepos) (which is this one)
+  * The [**_SUB1_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-sub1)
+    * The [**_SUBSUB_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-subsub)
+  * The [**_SUB2_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-sub2)
+
+<a name="multigit_usage"/>  
+## multigit usage
+
+```
+jmnavarrol@:~/simplest-git-subrepos$ ./multigit
+USAGE: multigit [-h|--help]  - shows this help
+       multigit [-c|--clone] - recursively clones all defined git repos
+jmnavarrol@mithrandir:~/simplest-git-subrepos$
+```
+
+Running `multigit --clone` produces this lay out:
+```
+jmnavarrol@mithrandir:~/$ tree -d simplest-git-subrepos/
+simplest-git-subrepos/
+├── sub1
+└── sub2
+```
+
+You can see there's no sign of the `subsub` directory (and repo).  That's because `multigit` checkouts whatever happens to be the default branch of the repo, _master_ in this case, and I haven't defined any subrepo on that branch within **_SUB1_** (on purpose).
+
+Now, go to **_SUB1_** to checkout its _development_ branch, where I did defined **_SUBSUB_** as subrepo and run `multigit` again, either right from _sub1_ or from the top directory:
+```
+jmnavarrol@:~/simplest-git-subrepos$ cd sub1/
+jmnavarrol@:~/simplest-git-subrepos/sub1$ git checkout development
+Branch development set up to track remote branch development from origin.
+Switched to a new branch 'development'
+jmnavarrol@:~/simplest-git-subrepos/sub1$ ll
+total 36K
+-rw-r--r-- 1 jmnav jmnav   82 may 15 11:51 file1
+-rw-r--r-- 1 jmnav jmnav  18K may 15 11:43 LICENSE
+-rwxr-xr-x 1 jmnav jmnav 2,1K may 15 11:51 multigit
+-rw-r--r-- 1 jmnav jmnav  221 may 15 11:43 README.md
+-rw-r--r-- 1 jmnav jmnav  377 may 15 11:51 subrepos
+jmnavarrol@:~/simplest-git-subrepos/sub1$ cat subrepos 
+# Hash listing the subrepos this one depends on
+# Structure of each element: ["directory name"]="path to repo"
+# i.e.: REPOS=( ["sub1"]="git@gitolite:sub1" ["sub2"]="git@gitolite:sub2" )
+
+declare -A REPOS
+# REPOS=( ["sub1"]="git@gitolite:sub1" ["sub2"]="git@gitolite:sub2" )
+REPOS["subsub"]="https://github.com/jmnavarrol/simplest-git-subrepos-subsub.git"  # The 'subsub' repo
+jmnavarrol@:~/simplest-git-subrepos/sub1$ cd ..
+jmnavarrol@:~/simplest-git-subrepos$ ./multigit --clone
+subsub doesn't exist: about to clone it...
+Cloning into 'subsub'...
+remote: Counting objects: 19, done.
+remote: Compressing objects: 100% (17/17), done.
+remote: Total 19 (delta 4), reused 12 (delta 1), pack-reused 0
+Unpacking objects: 100% (19/19), done.
+Checking connectivity... done.
+jmnavarrol@:~/simplest-git-subrepos$
+
+```
+...see the result now:
+```
+jmnavarrol@mithrandir:~/$ tree -d simplest-git-subrepos/
+simplest-git-subrepos/
+├── sub1
+│   └── subsub
+└── sub2
+```
+...just as expected.
+
+Feel free to experiment with the script.  Comments, issues, pull requests are welcomed [at the project's page on GitHub](https://github.com/jmnavarrol/simplest-git-subrepos).
 
 ----
 
