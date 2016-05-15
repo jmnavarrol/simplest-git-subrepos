@@ -1,0 +1,89 @@
+#/bin/bash
+# Manages a "git repos within git repos" structure.
+#
+# This file is under SCM control; do not edit in-place.
+
+# GLOBALS
+readonly REPOLIST='subrepos'  # the list of "subrepos" to clone is whitin this file
+
+readonly SCRIPT_NAME=`basename ${BASH_SOURCE[0]}`  # Script's name
+readonly GETOPT=/usr/bin/getopt
+
+
+#---
+# LOCAL FUNCTIONS
+#---
+# Show script's help
+usage() {
+	echo "USAGE: $SCRIPT_NAME [-h|--help]  - shows this help"
+	echo "       $SCRIPT_NAME [-c|--clone] - recursively clones all defined git repos"
+}
+
+
+# Looks for deeper "subrepo scripts" and runs them
+search_subrepos() {
+# '-depth' starts with the deepers scripts first
+# '-mindepth 2' excludes this script itself from the search results, so it doesn't run in an endless loop
+# ! -wholename '*.git/*' excludes .git hidden directories from search
+# '-execdir' runs the scritps found on their own directories
+	find . -depth -mindepth 2 -type f ! -wholename '*.git/*' -name $SCRIPT_NAME -execdir /bin/bash '{}' --clone \;
+}
+
+
+# Checks out nested repos as needed
+# it depends on the REPOLIST file existing and containing a hash, by name 'REPOS', with the list of dirs and repos
+clone() {
+	if [ -r "$REPOLIST" ]; then
+		source "$REPOLIST"
+		for dir in "${!REPOS[@]}"; do
+			if [ ! -d "$dir" ]; then
+				echo "$dir doesn't exist: about to clone it..."
+				git clone "${REPOS[$dir]}" "$dir" && search_subrepos
+			fi
+		done
+	fi
+}
+
+
+
+#--
+# MAIN
+#--
+OPTIONS=`$GETOPT --options hcp --longoptions help,clone,to-prod -n $0 -- "$@"`
+# If error, show the script's help and bail out
+if [ $? != 0 ] ; then
+	usage
+	exit 1
+fi
+
+
+eval set -- "$OPTIONS"
+if [ "$1" == "--" ]; then
+# no params: show help
+	usage
+	exit 1
+elif [ $# -gt 2 ]; then
+# too many options: show help
+	no_of_params=$#
+	no_of_params=$((no_of_params-1))
+	echo "Number of parameters: $no_of_params, but only one is accepted."
+	usage
+	exit 1
+else
+# Check options and run accordingly
+	while true; do
+		case "$1" in
+			-h|--help)
+				usage
+				shift
+			;;
+			-c|--clone)
+				search_subrepos && clone
+				shift
+			;;
+			--)
+				shift ; break ;;
+			*) echo "Internal Error!" ; exit 1 ;;
+		esac
+	done
+fi
