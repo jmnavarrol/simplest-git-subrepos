@@ -4,10 +4,12 @@
 # This file is under SCM control; do not edit in-place.
 
 # GLOBALS
-readonly REPOLIST='subrepos'  # the list of "subrepos" to clone is whitin this file
+readonly REPOLIST_FILE='subrepos'  # the list of "subrepos" to clone is whitin this file
+declare -A ALL_SUBREPOS            # hash to recursively collect all known subrepos
 
 readonly SCRIPT_NAME=`basename ${BASH_SOURCE[0]}`  # Script's name
 readonly GETOPT=/usr/bin/getopt
+readonly GIT=/usr/bin/git
 
 
 #---
@@ -15,33 +17,113 @@ readonly GETOPT=/usr/bin/getopt
 #---
 # Show script's help
 usage() {
-	echo "USAGE: $SCRIPT_NAME [-h|--help]  - shows this help"
-	echo "       $SCRIPT_NAME [-c|--clone] - recursively clones all defined git repos"
+	echo "USAGE: $SCRIPT_NAME [-c|--clone]    - recursively Clones all defined git subrepos"
+	echo "       $SCRIPT_NAME [-h|--help]     - shows this Help"
+	echo "       $SCRIPT_NAME [-k|--checkout] - cheKs out the current branch in all defined git subrepos"
+	echo "       $SCRIPT_NAME [-l|--list]     - Lists git subrepos found"
 }
 
 
-# Looks for deeper "subrepo scripts" and runs them
-search_subrepos() {
-# '-depth' starts with the deepers scripts first
-# '-mindepth 2' excludes this script itself from the search results, so it doesn't run in an endless loop
-# ! -wholename '*.git/*' excludes .git hidden directories from search
-# '-execdir' runs the scritps found on their own directories
-	find . -depth -mindepth 2 -type f ! -wholename '*.git/*' -name $SCRIPT_NAME -execdir /bin/bash '{}' --clone \;
-}
-
-
-# Checks out nested repos as needed
-# it depends on the REPOLIST file existing and containing a hash, by name 'REPOS', with the list of dirs and repos
-clone() {
-	if [ -r "$REPOLIST" ]; then
-		source "$REPOLIST"
-		for dir in "${!REPOS[@]}"; do
-			if [ ! -d "$dir" ]; then
-				echo "$dir doesn't exist: about to clone it..."
-				git clone "${REPOS[$dir]}" "$dir" && search_subrepos
-			fi
-		done
+# Checks for all needed bits to be in place
+check_enviro() {
+	if [ ! -x "$GETOPT" ]; then
+		echo "ERROR: ${GETOPT} can't be found or is not executable (it is needed to parse the script's options)."
+		exit 1
+	elif [ ! -x "$GIT" ]; then
+		echo "ERROR: ${GIT} can't be found or is not executable."
+		exit 1
+	elif [ ! -r "$REPOLIST_FILE" ]; then
+		echo "ERROR: ${REPOLIST_FILE} can't be found or is not readable (it is needed to know which subrepos to work on)."
+		exit 1
 	fi
+}
+
+
+# Finds subrepos and collects them in a hash
+search_subrepos(){
+# Make sure the global "subrepos superlist" is clean
+	unset $ALL_SUBREPOS
+	declare -Ag ALL_SUBREPOS
+# get all files listing suprepos
+	mapfile -t filelist < <(find . -depth -type f ! -wholename '*.git/*' -name $REPOLIST_FILE)
+# now, read each repo file in turn and add its data to a global "subrepos superlist"
+	for file in "${filelist[@]}"; do
+		rel_path="$(dirname $file)"
+		source "${file}"  # this sets the REPO hash
+		for dir in "${!REPOS[@]}"; do
+			ALL_SUBREPOS["${rel_path}/${dir}"]="${REPOS[$dir]}"
+		done
+		unset REPOS  # clean back the REPO hash once read
+	done
+}
+
+
+# Returns a list of known subrepos and the remotes they point to
+list_subrepos() {
+	search_subrepos
+	for dir in "${!ALL_SUBREPOS[@]}"; do
+		echo "${dir} defined as clone of: ${ALL_SUBREPOS[$dir]}"
+	done
+}
+
+
+# git-clones nested repos as needed
+clone() {
+# make sure the list of subrepos is up to date
+	search_subrepos
+# find all defined subrepos and clone them as needed
+	for dir in "${!ALL_SUBREPOS[@]}"; do
+		if [ ! -d "$dir" ]; then
+			echo "$dir doesn't exist: about to clone it from ${ALL_SUBREPOS[$dir]}..."
+			# once cloned, recurse in case of new sub-subrepos appearing
+			$GIT clone "${ALL_SUBREPOS[$dir]}" "$dir" && clone
+		fi
+	done
+}
+
+
+# Changes the active branch on all subrepos to be the same as the (relative) top one
+checkout(){
+pending_actions=0
+# make sure the list of subrepos is up to date
+	search_subrepos
+# get current branch
+	target_branch=`git symbolic-ref --short HEAD`
+	echo "Current branch is ${current_branch}"
+# list branches on subrepos
+	for dir in "${!ALL_SUBREPOS[@]}"; do
+	# the subrepo might not be checked out yet.  Test and act accordingly
+	# (activate 'pending_actions' since this can rise new subrepos)
+		[ -d "$dir" ] || pending_actions=1 && clone
+		# since we need to cd into the subrepo's root, let's do it within a subshell
+		export dir target_branch pending_actions
+		(
+			cd $dir
+			local_branch=`git symbolic-ref --short HEAD`
+			if [ "$local_branch" != "$target_branch" ]; then
+			# Does the remote branch by that name exists?  If not, bail out (too dangerous to try anything)
+				$GIT ls-remote --heads --quiet --exit-code origin "$target_branch" > /dev/null
+				if [ $? != 0 ]; then
+					echo "ERROR: branch $target_branch doesn't exist at remote end on subrepo $dir."
+					echo "Cowardly bailing out as I don't know what I should do."
+					exit 1
+				fi
+			# Everything seems OK: let's checkout the requested branch
+				echo -e "branch ${local_branch} at ${dir} doesn't match: about to change it..."
+				# check if a local branch by the required name already exists.  If not, create it
+				$GIT show-ref --verify --quiet "refs/heads/${target_branch}" || git_opt="-t origin/"
+				# finally, the checkout itself
+				# (activate 'pending_actions' since this can rise new subrepos)
+				pending_actions=1 && $GIT checkout ${git_opt}"$target_branch"
+			fi
+		)
+		if [ $? != 0 ]; then
+			echo "ERROR: Look for errors above and correct before running the script again."
+			exit 1
+		fi
+	done
+# new subrepos might have appeared; rinse and repeat if that's the case
+	[ $pending_actions != 0 ] && checkout
 }
 
 
@@ -49,7 +131,11 @@ clone() {
 #--
 # MAIN
 #--
-OPTIONS=`$GETOPT --options hcp --longoptions help,clone,to-prod -n $0 -- "$@"`
+# First let see if all dependencies are in place
+check_enviro
+
+# Then, parse options
+OPTIONS=`$GETOPT --options hckl --longoptions help,clone,checkout,list -n $0 -- "$@"`
 # If error, show the script's help and bail out
 if [ $? != 0 ] ; then
 	usage
@@ -57,6 +143,7 @@ if [ $? != 0 ] ; then
 fi
 
 
+# Finally run on the options
 eval set -- "$OPTIONS"
 if [ "$1" == "--" ]; then
 # no params: show help
@@ -73,12 +160,20 @@ else
 # Check options and run accordingly
 	while true; do
 		case "$1" in
+			-c|--clone)
+				search_subrepos && clone
+				shift
+			;;
 			-h|--help)
 				usage
 				shift
 			;;
-			-c|--clone)
-				search_subrepos && clone
+			-k|--checkout)
+				checkout
+				shift
+			;;
+			-l|--list)
+				list_subrepos
 				shift
 			;;
 			--)
