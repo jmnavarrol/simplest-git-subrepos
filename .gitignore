@@ -5,3 +5,5 @@ sub2/
 # global git ignores
 *~
 *.swp
+*.kate-swp
+
