@@ -11,6 +11,10 @@ readonly SCRIPT_NAME=`basename ${BASH_SOURCE[0]}`  # Script's name
 readonly GETOPT=/usr/bin/getopt
 readonly GIT=/usr/bin/git
 
+# Style table
+readonly RED='\033[1;31m'  # Red (and bold)
+readonly NC='\033[0m'      # No Color
+
 
 #---
 # LOCAL FUNCTIONS
@@ -27,13 +31,13 @@ usage() {
 # Checks for all needed bits to be in place
 check_enviro() {
 	if [ ! -x "$GETOPT" ]; then
-		echo "ERROR: ${GETOPT} can't be found or is not executable (it is needed to parse the script's options)."
+		echo "${RED}ERROR:${NC} ${GETOPT} can't be found or is not executable (it is needed to parse the script's options)."
 		exit 1
 	elif [ ! -x "$GIT" ]; then
-		echo "ERROR: ${GIT} can't be found or is not executable."
+		echo "${RED}ERROR:${NC} ${GIT} can't be found or is not executable."
 		exit 1
 	elif [ ! -r "$REPOLIST_FILE" ]; then
-		echo "ERROR: ${REPOLIST_FILE} can't be found or is not readable (it is needed to know which subrepos to work on)."
+		echo "${RED}ERROR:${NC} ${REPOLIST_FILE} can't be found or is not readable (it is needed to know which subrepos to work on)."
 		exit 1
 	fi
 }
@@ -89,12 +93,12 @@ pending_actions=0
 	search_subrepos
 # get current branch
 	target_branch=`git symbolic-ref --short HEAD`
-	echo "Current branch is ${current_branch}"
+	echo "Current branch is ${target_branch}"
 # list branches on subrepos
 	for dir in "${!ALL_SUBREPOS[@]}"; do
 	# the subrepo might not be checked out yet.  Test and act accordingly
 	# (activate 'pending_actions' since this can rise new subrepos)
-		[ -d "$dir" ] || pending_actions=1 && clone
+		[ -d "$dir" ] || ( pending_actions=1 && clone )
 		# since we need to cd into the subrepo's root, let's do it within a subshell
 		export dir target_branch pending_actions
 		(
@@ -104,21 +108,21 @@ pending_actions=0
 			# Does the remote branch by that name exists?  If not, bail out (too dangerous to try anything)
 				$GIT ls-remote --heads --quiet --exit-code origin "$target_branch" > /dev/null
 				if [ $? != 0 ]; then
-					echo "ERROR: branch $target_branch doesn't exist at remote end on subrepo $dir."
-					echo "Cowardly bailing out as I don't know what I should do."
-					exit 1
+					echo -e "${RED}WARNING!${NC} branch $target_branch doesn't exist at remote end on subrepo $dir."
+					echo -e "\tRepo ${dir} will stay at branch ${local_branch} instead of ${target_branch}"
+				else
+				# Everything seems OK: let's checkout the requested branch
+					echo -e "branch ${local_branch} at ${dir} doesn't match ${target_branch}: about to change it..."
+					# check if a local branch by the required name already exists.  If not, create it
+					$GIT show-ref --verify --quiet "refs/heads/${target_branch}" || git_opt="-t origin/"
+					# finally, the checkout itself
+					# (activate 'pending_actions' since this can rise new subrepos)
+					pending_actions=1 && $GIT checkout ${git_opt}"$target_branch"
 				fi
-			# Everything seems OK: let's checkout the requested branch
-				echo -e "branch ${local_branch} at ${dir} doesn't match: about to change it..."
-				# check if a local branch by the required name already exists.  If not, create it
-				$GIT show-ref --verify --quiet "refs/heads/${target_branch}" || git_opt="-t origin/"
-				# finally, the checkout itself
-				# (activate 'pending_actions' since this can rise new subrepos)
-				pending_actions=1 && $GIT checkout ${git_opt}"$target_branch"
 			fi
 		)
 		if [ $? != 0 ]; then
-			echo "ERROR: Look for errors above and correct before running the script again."
+			echo -e "${RED}ERROR:${NC} Look for errors above and correct before running the script again."
 			exit 1
 		fi
 	done
@@ -178,7 +182,7 @@ else
 			;;
 			--)
 				shift ; break ;;
-			*) echo "Internal Error!" ; exit 1 ;;
+			*) echo "${RED}Internal Error!${NC}" ; exit 1 ;;
 		esac
 	done
 fi

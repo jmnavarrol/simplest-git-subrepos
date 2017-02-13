@@ -149,8 +149,10 @@ I created projects at GitHub to publish the script and self-explain its working 
 
 ```
 jmnavarrol@:~/simplest-git-subrepos$ ./multigit
-USAGE: multigit [-h|--help]  - shows this help
-       multigit [-c|--clone] - recursively clones all defined git repos
+USAGE: multigit [-c|--clone]    - recursively Clones all defined git subrepos
+       multigit [-h|--help]     - shows this Help
+       multigit [-k|--checkout] - cheKs out the current branch in all defined git subrepos
+       multigit [-l|--list]     - Lists git subrepos found
 jmnavarrol@mithrandir:~/simplest-git-subrepos$
 ```
 
