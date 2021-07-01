@@ -1,0 +1,4 @@
+[Project]
+Manager=KDevGenericManager
+Name=simplest-git-subrepos
+VersionControlSupport=kdevgit

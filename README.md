@@ -10,9 +10,11 @@ The simplest way to manage git repos within git repos.
 * [going forward](#going_forward)
 * [multigit usage](#multigit_usage)
 
-<a name="the_long_explanation"/>  
-## the long explanation
+**NOTE:** the goal of this repository is just to showcase this idea.  If you look for an (eventually) product-grade version, please visit my other project, [python-multigit](https://github.com/jmnavarrol/python-multigit).
 
+----
+
+## the long explanation<a name="the_long_explanation"></a>
 It is [quite a common desire](https://www.google.es/search?q=git+repos+within+git+repos) to somehow have git repositories within git repositories<sup name="fe1">[[1]](#fn1)</sup>.  The typical answers involve convoluted incantations of [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) (with [the usual word of caution about them](https://codingkilledthecat.wordpress.com/2012/04/28/why-your-company-shouldnt-use-git-submodules/)), [git-subtree](https://github.com/git/git/blob/master/contrib/subtree/git-subtree.txt) (which is [_oh, so much easier!_](https://developer.atlassian.com/blog/2015/05/the-power-of-git-subtree/?_ga=1.267682510.1986266707.1461346777)), or even specifically crafted tools to deal with the complexity of those<sup name="fe2">[[2]](#fn2)</sup>.
 
 In the end, the point is that something that sounds like it should be easy ends up being complex and -the worse of it, error prone.
@@ -23,10 +25,8 @@ The naive approach (_my_ naive approach at least) would be _...well, why not jus
 
 After such a _"discovery"_ I decided to share publicly by example in case others find it of benefit.
 
-<a name="the_use_case"/>  
-## the use case
-
-It seems that the motto _"make easy things easy and hard things possible"_ can be tracked down to [Larry Wall](https://www.wikipedia.org/wiki/Larry_Wall) and ["Learning Perl"](http://shop.oreilly.com/product/9781565922846.do), aka _the Llama book_.  I'm not telling submodules, subtrees, all those tools... are not without merit but I do say they fail Wall's saying: they certainly fail at making easy things easy.  But, what I want to suit then?
+## the use case<a name="the_use_case"></a>
+It seems that the motto _"make easy things easy and hard things possible"_ can be tracked down to [Larry Wall](https://www.wikipedia.org/wiki/Larry_Wall) and ["Learning Perl"](http://shop.oreilly.com/product/9781565922846.do), aka _the Llama book_.  I'm not telling submodules, subtrees, all those tools... are not without merit but I do say they fail Wall's saying: they certainly fail at making easy things easy.  But, what I want to suit, then?
 
 Let's have a project which I'll call **_SUPER_** which have some glue files in order to tie together another two ones which I'll call **_SUB1_** and **_SUB2_** (you can think of, say, a web front end using two modules, or whatever).  Just to make things funnier, let's imagine that **_SUB1_** also includes a deeper module, which I'll call **_SUBSUB_**.  Overall, the layout looks like this:
 
@@ -43,9 +43,7 @@ Now, if I merely _consume_ the contents of **_SUB1_** and **_SUB2_** (and, of co
 1. The functionallity of the submodules can only be ascertained (at least comfortably) by means of their integration with the **_SUPER_** one.
 2. I have write access to at least some branches on the submodules.
 
-<a name="the_solution"/>  
-## the solution
-
+## the solution<a name="the_solution"></a>
 As I already said above, why not try to just create a git repo within another?  So let's do it:
 ```
 jmnavarrol@:~/super$ git init
@@ -129,9 +127,7 @@ See? **_SUB1_** has _"disappeared"_ from sight and it's guaranteed to stay that 
 
 From now on you can manage **_SUPER_** and **_SUB1_** just as two completely different repositories: no need to learn the arcanes of a new tool, no more _"Oh! I pushed to the wrong repo!"_, or _"I pulled from the parent repo... where the heck have my changes on the submodule gone!?"_, just plain old git commands.
 
-<a name="going_forward"/>  
-## going forward
-
+## going forward<a name="going_forward"></a>
 There's no much forward to go to: the trick about `.gitignore` is basically all of it.  After all I promised _"The simplest way"_, right?
 
 There is one problem, though, and it comes _because_ of the fact that **_SUPER_** and **_SUB1_** are so completely decoupled (which was my _selling point_ to start with): in the example above I worked on local repositories but what if, as it is the usual case, there is a whole team working out of remote repos?  When somebody clones **_SUPER_** he gets no hint on what to do to reach to **_SUB1_** or even that it exists at all.  Of course, one could resort to external documentation to tell him what to do but that wouldn't be _"making easy things easy"_ right?
@@ -144,8 +140,7 @@ I created projects at GitHub to publish the script and self-explain its working 
     * The [**_SUBSUB_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-subsub)
   * The [**_SUB2_** repository](https://github.com/jmnavarrol/simplest-git-subrepos-sub2)
 
-<a name="multigit_usage"/>  
-## multigit usage
+## multigit usage<a name="multigit_usage"></a>
 
 ```
 jmnavarrol@:~/simplest-git-subrepos$ ./multigit
@@ -153,12 +148,12 @@ USAGE: multigit [-c|--clone]    - recursively Clones all defined git subrepos
        multigit [-h|--help]     - shows this Help
        multigit [-k|--checkout] - cheKs out the current branch in all defined git subrepos
        multigit [-l|--list]     - Lists git subrepos found
-jmnavarrol@mithrandir:~/simplest-git-subrepos$
+jmnavarrol@:~/simplest-git-subrepos$
 ```
 
 Running `multigit --clone` produces this lay out:
 ```
-jmnavarrol@mithrandir:~/$ tree -d simplest-git-subrepos/
+jmnavarrol@:~/$ tree -d simplest-git-subrepos/
 simplest-git-subrepos/
 ├── sub1
 └── sub2
@@ -166,7 +161,7 @@ simplest-git-subrepos/
 
 You can see there's no sign of the `subsub` directory (and repo).  That's because `multigit` checkouts whatever happens to be the default branch of the repo, _master_ in this case, and I haven't defined any subrepo on that branch within **_SUB1_** (on purpose).
 
-Now, go to **_SUB1_** to checkout its _development_ branch, where I did defined **_SUBSUB_** as subrepo and run `multigit` again, either right from _sub1_ or from the top directory:
+Now, go to **_SUB1_** to checkout its _development_ branch, where I did define **_SUBSUB_** as subrepo and run `multigit` again, either right from _sub1_ or from the top directory:
 ```
 jmnavarrol@:~/simplest-git-subrepos$ cd sub1/
 jmnavarrol@:~/simplest-git-subrepos/sub1$ git checkout development
@@ -201,7 +196,7 @@ jmnavarrol@:~/simplest-git-subrepos$
 ```
 ...see the result now:
 ```
-jmnavarrol@mithrandir:~/$ tree -d simplest-git-subrepos/
+jmnavarrol@:~/$ tree -d simplest-git-subrepos/
 simplest-git-subrepos/
 ├── sub1
 │   └── subsub
