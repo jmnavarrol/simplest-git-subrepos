@@ -1,8 +1,9 @@
-# Hash listing the subrepos this one depends on
-# Structure of each element: ["directory name"]="path to repo"
-# i.e.: REPOS=( ["sub1"]="git@gitolite:sub1" ["sub2"]="git@gitolite:sub2" )
+---
+# YAML 'subrepos' version to be used by python-multigit
+# See https://github.com/jmnavarrol/python-multigit
 
-declare -A REPOS
-# REPOS=( ["sub1"]="git@gitolite:sub1" ["sub2"]="git@gitolite:sub2" )
-REPOS["sub1"]="https://github.com/jmnavarrol/simplest-git-subrepos-sub1.git"  # The 'sub1' repo
-REPOS["sub2"]="https://github.com/jmnavarrol/simplest-git-subrepos-sub2.git"  # The 'sub2' repo
+subrepos:
+- path: 'sub1'
+  repo: 'https://github.com/jmnavarrol/simplest-git-subrepos-sub1.git'
+- path: 'sub2'
+  repo: 'https://github.com/jmnavarrol/simplest-git-subrepos-sub2.git'
