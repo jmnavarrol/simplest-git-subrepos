@@ -10,7 +10,9 @@ The simplest way to manage git repos within git repos.
 * [going forward](#going_forward)
 * [multigit usage](#multigit_usage)
 
-**NOTE:** the goal of this repository is just to showcase this idea.  If you look for an (eventually) product-grade version, please visit my other project, [python-multigit](https://github.com/jmnavarrol/python-multigit).
+**NOTES:**
+* The goal of this repository is just to showcase this idea.  If you look for an (eventually) product-grade version, please visit my other project, [python-multigit](https://github.com/jmnavarrol/python-multigit).
+* This branch exists only so it can be used to test [python-multigit](https://github.com/jmnavarrol/python-multigit) features.
 
 ----
 
