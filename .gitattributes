@@ -1,0 +1,4 @@
+# Hints so GitHub "discovers" the programming languages used in this project
+
+subrepos linguist-language=bash
+multigit linguist-language=bash
