@@ -4,6 +4,7 @@
 
 subrepos:
 - path: 'sub1'
-  repo: 'https://github.com/jmnavarrol/simplest-git-subrepos-sub1.git'
+  repo: 'git@github.com:jmnavarrol/simplest-git-subrepos-sub1.git'
+  branch: 'python-example'
 - path: 'sub2'
-  repo: 'https://github.com/jmnavarrol/simplest-git-subrepos-sub2.git'
+  repo: 'git@github.com:jmnavarrol/simplest-git-subrepos-sub2.git'
