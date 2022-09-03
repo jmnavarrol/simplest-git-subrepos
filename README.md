@@ -10,7 +10,17 @@ The simplest way to manage git repos within git repos.
 * [going forward](#going_forward)
 * [multigit usage](#multigit_usage)
 
-**NOTE:** the goal of this repository is just to showcase this idea.  If you look for an (eventually) product-grade version, please visit my other project, [python-multigit](https://github.com/jmnavarrol/python-multigit).
+----
+
+> **⚠ WARNING: Do not use this tool in production/live environments.**
+>
+> This script is just meant to showcase this idea's happy path.  As such, no attempt at error managing, input sanitation, etc. is ever attempted.
+>
+> i.e.: the *subrepos file* is just sourced from the main script so imagine what happens when someone tweaks its contents so instead of the expected *hash* it sources something like this: `rm -rf ~/`.
+>
+> **YOU'VE BEEN WARNED!!!**
+>
+> If you look for an (eventually) product-grade version, please visit my other project, [python-multigit](https://github.com/jmnavarrol/python-multigit).
 
 ----
 
