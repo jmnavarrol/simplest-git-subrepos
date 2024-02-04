@@ -20,7 +20,7 @@ The simplest way to manage git repos within git repos.
 >
 > **YOU'VE BEEN WARNED!!!**
 >
-> If you look for an (eventually) product-grade version, please visit my other project, [python-multigit](https://github.com/jmnavarrol/python-multigit).
+> If you look for a production-grade version, please visit my other project, [python-multigit](https://github.com/jmnavarrol/python-multigit).
 
 ----
 
